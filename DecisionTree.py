@@ -1,7 +1,7 @@
 from sklearn.datasets import load_breast_cancer
 from sklearn.model_selection import train_test_split
-import numpy as np
 from collections import Counter
+import numpy as np
 
 """
 Concept behind:
@@ -35,7 +35,8 @@ class Node:
 
 
 class DecisionTreeClassifier:
-    def __init__(self, max_depth=100):
+    def __init__(self, num_split_features, max_depth):
+        self.num_split_features = num_split_features
         self.max_depth = max_depth
         self.root_node = None
 
@@ -66,7 +67,14 @@ class DecisionTreeClassifier:
         best_gain = -1
         best_split_feature_idx, best_threshold = None, None
 
-        for feature_idx in range(X.shape[1]):
+        num_features = X.shape[1]
+        if self.num_split_features <= 0:
+            self.num_split_features = num_features
+        self.num_split_features = min(num_features, self.num_split_features)
+        feature_idxs = np.random.choice(
+            num_features, self.num_split_features, replace=False
+        )
+        for feature_idx in feature_idxs:
             feature_column = X[:, feature_idx]
             thresholds = np.unique(feature_column)
             for threshold in thresholds:
@@ -116,7 +124,8 @@ class DecisionTreeClassifier:
         return left_idxs, right_idxs
 
     def predict(self, X):
-        return [self._traverse_tree(x, self.root_node) for x in X]
+        pred = [self._traverse_tree(x, self.root_node) for x in X]
+        return pred
 
     def _traverse_tree(self, x, node: Node):
         if node.is_leaf_node():
@@ -127,21 +136,17 @@ class DecisionTreeClassifier:
         return self._traverse_tree(x, node.right)
 
 
-data = load_breast_cancer()
-X, y = data.data, data.target
+def test_model():
+    data = load_breast_cancer()
+    X, y = data.data, data.target
 
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=3221348
-)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=3221348
+    )
 
-model = DecisionTreeClassifier(max_depth=3)
-model.fit(X_train, y_train)
-predictions = model.predict(X_test)
+    model = DecisionTreeClassifier(num_split_features=5, max_depth=3)
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
 
-
-def accuracy(y_test, y_pred):
-    return np.sum(y_test == y_pred) / len(y_test)
-
-
-acc = accuracy(y_test, predictions)
-print(acc)
+    acc = np.sum(y_test == y_pred) / len(y_test)
+    return acc
