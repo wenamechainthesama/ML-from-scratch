@@ -4,15 +4,20 @@ import matplotlib.pyplot as plt
 
 # https://ajaykrish-krishnanrb.medium.com/multiple-linear-regression-from-scratch-using-python-ae150ac505c
 class MultipleLinearRegression:
-    def __init__(self, num_weights, learning_rate=0.001):
+    def __init__(self, num_weights, learning_rate=0.001, l1_lambda=0, l2_lambda=0):
         self.learning_rate = learning_rate
         self.weights = np.random.rand(num_weights)
         self.bias = 0.001 * np.random.rand()
+        self.l1_lambda = l1_lambda
+        self.l2_lambda = l2_lambda
 
-    def loss(self, y_true, predictions):
-        return np.mean(np.square(y_true - predictions))
+    def cost(self, y_true, predictions):
+        cost = np.mean(np.square(y_true - predictions))
+        cost += self.l1_lambda * np.abs(self.weights).sum()
+        cost += self.l2_lambda * np.sum(self.weights**2)
+        return cost
 
-    def gradient_descent(self, features, y_true, predictions):
+    def _gradient_descent(self, features, y_true, predictions):
         error = y_true - predictions
         dW = []
         for feature in features:
@@ -20,21 +25,21 @@ class MultipleLinearRegression:
         db = -2 * np.mean(error)
         return dW, db
 
-    def optimize_model_parametes(self, features, y_true, predictions):
-        dW, db = self.gradient_descent(features, y_true, predictions)
+    def _optimize_model_parametes(self, features, y_true, predictions):
+        dW, db = self._gradient_descent(features, y_true, predictions)
         for i in range(len(self.weights)):
             self.weights[i] -= self.learning_rate * dW[i]
         self.bias -= self.learning_rate * db
 
-    def fit(self, x_train, y_true, epochs=100, verbose=False):
+    def fit(self, x_train, y_true, epochs=1000, verbose=False):
         history = []
         for epoch in range(epochs):
             predicts = self.predict(x_train)
-            loss = self.loss(y_true, predicts)
-            self.optimize_model_parametes(x_train, y_true, predicts)
+            cost = self.cost(y_true, predicts)
+            self._optimize_model_parametes(x_train, y_true, predicts)
             if verbose:
-                print("epoch:", epoch, "loss:", loss)
-            history.append(loss)
+                print("epoch:", epoch, "cost:", cost)
+            history.append(cost)
         return history
 
     def predict(self, features):
@@ -42,11 +47,6 @@ class MultipleLinearRegression:
 
     def get_coefs(self):
         return self.weights, self.bias
-
-    def evaluate(self, test_features, y_test):
-        y_hat = self.predict(test_features)
-        loss = self.loss(y_test, y_hat)
-        return loss
 
 
 x1 = 4 * np.random.rand(100, 1) - 2

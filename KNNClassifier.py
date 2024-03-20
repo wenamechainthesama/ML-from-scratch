@@ -7,7 +7,7 @@ def euclidean_distance(pointA, pointB):
     return np.sum(np.power(np.subtract(pointA, pointB), 2)) ** 0.5
 
 
-class KNN:
+class KNNClassifier:
     def __init__(self, k):
         self.k = k
 
@@ -67,7 +67,7 @@ for i in range(len(dots)):
 
 dots_to_predict = [[2.75, 3], [2.5, 2.7], [2.25, 2.35]]
 
-model = KNN(k=5)
+model = KNNClassifier(k=5)
 model.fit(dots, y)
 prediction = model.predict(dots_to_predict)
 for i, dot in enumerate(dots_to_predict):
