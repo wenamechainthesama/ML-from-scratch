@@ -47,18 +47,18 @@ class LogisticRegression:
         return [0 if y < self.threshold else 1 for y in probabilities]
 
 
-bc = datasets.load_breast_cancer()
-X, y = bc.data, bc.target
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=3)
+if __name__ == "__main__":
+    bc = datasets.load_breast_cancer()
+    X, y = bc.data, bc.target
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=332708234
+    )
 
-model = LogisticRegression()
-model.fit(X_train, y_train)
-y_pred = model.predict(X_test)
+    model = LogisticRegression()
+    model.fit(X_train, y_train)
+    predictions = model.predict(X_test)
 
+    def accuracy(y_pred, y_test):
+        return np.sum(y_pred == y_test) / len(y_test)
 
-def accuracy(y_pred, y_test):
-    return np.sum(y_pred == y_test) / len(y_test)
-
-
-acc = accuracy(y_pred, y_test)
-print(acc)
+    print("Logistic Regression classification accuracy", accuracy(y_test, predictions))

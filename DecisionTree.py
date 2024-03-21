@@ -136,7 +136,7 @@ class DecisionTreeClassifier:
         return self._traverse_tree(x, node.right)
 
 
-def test_model():
+if __name__ == "__main__":
     data = load_breast_cancer()
     X, y = data.data, data.target
 
@@ -146,7 +146,9 @@ def test_model():
 
     model = DecisionTreeClassifier(num_split_features=5, max_depth=3)
     model.fit(X_train, y_train)
-    y_pred = model.predict(X_test)
+    predictions = model.predict(X_test)
 
-    acc = np.sum(y_test == y_pred) / len(y_test)
-    return acc
+    def accuracy(y_true, y_pred):
+        return np.sum(y_true == y_pred) / len(y_true)
+
+    print("Decision Tree classification accuracy", accuracy(y_test, predictions))

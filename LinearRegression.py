@@ -49,24 +49,25 @@ class MultipleLinearRegression:
         return self.weights, self.bias
 
 
-x1 = 4 * np.random.rand(100, 1) - 2
-x2 = 2 * np.random.rand(100, 1) + 3
-x3 = 5 * np.random.rand(100, 1) - 1
-x4 = 7 * np.random.rand(100, 1) + 4
-y = 4 - 9 * x1 + 13 * x2 + 3 * x3 - 7 * x4 + 8 * np.random.rand(100, 1)
-model = MultipleLinearRegression(num_weights=4)
-history = model.fit(
-    np.array([x1.flatten(), x2.flatten(), x3.flatten(), x4.flatten()]), y
-)
+if __name__ == "__main__":
+    x1 = 4 * np.random.rand(100, 1) - 2
+    x2 = 2 * np.random.rand(100, 1) + 3
+    x3 = 5 * np.random.rand(100, 1) - 1
+    x4 = 7 * np.random.rand(100, 1) + 4
+    y = 4 - 9 * x1 + 13 * x2 + 3 * x3 - 7 * x4 + 8 * np.random.rand(100, 1)
+    model = MultipleLinearRegression(num_weights=4)
+    history = model.fit(
+        np.array([x1.flatten(), x2.flatten(), x3.flatten(), x4.flatten()]), y
+    )
 
-# Plot learning curve
-model_coef, bias = model.get_coefs()
-plt.figure(figsize=(8, 5))
-plt.plot(history)
-plt.title(f"Learning curve # Learned Weights:{model_coef} and bias:{bias :.2f}")
-plt.xlabel("Epochs")
-plt.ylabel("Mean squared error")
-plt.show()
+    # Plot learning curve
+    model_coef, bias = model.get_coefs()
+    plt.figure(figsize=(8, 5))
+    plt.plot(history)
+    plt.title(f"Learning curve # Learned Weights:{model_coef} and bias:{bias :.2f}")
+    plt.xlabel("Epochs")
+    plt.ylabel("Mean squared error")
+    plt.show()
 
 
 # Read https://muthu.co/maths-behind-polynomial-regression/ for understanding math behind it
@@ -96,16 +97,17 @@ class PolynomialRegression:
         return predictions
 
 
-x = 4 * np.random.rand(100, 1) - 2
-y = 4 - x + 20 * x**2 + 10 * x**3 - 2 * x**4 + 8 * np.random.rand(100, 1)
+if __name__ == "__main__":
+    x = 4 * np.random.rand(100, 1) - 2
+    y = 4 - x + 20 * x**2 + 10 * x**3 - 2 * x**4 + 8 * np.random.rand(100, 1)
 
-model = PolynomialRegression(degree=4)
-model.fit(x, y)
-plt.scatter(x, y)
-X_vals = np.linspace(-2, 2, 100).reshape(-1, 1)
-y_vals = model.predict(X_vals)
-plt.plot(X_vals, y_vals, c="red")
-plt.show()
+    model = PolynomialRegression(degree=4)
+    model.fit(x, y)
+    plt.scatter(x, y)
+    X_vals = np.linspace(-2, 2, 100).reshape(-1, 1)
+    y_vals = model.predict(X_vals)
+    plt.plot(X_vals, y_vals, c="red")
+    plt.show()
 
 
 # Source: https://youtu.be/zMqhnpWgSS8?feature=shared
@@ -129,23 +131,24 @@ class LinearClassifier:
         return self.weights
 
 
-X = np.array([[9, 1], [8, 1], [7, 2], [10, 2], [5, 5], [5, 4], [6, 3], [6, 6]])
-y = np.array([-1, -1, -1, -1, 1, 1, 1, 1])
+if __name__ == "__main__":
+    X = np.array([[9, 1], [8, 1], [7, 2], [10, 2], [5, 5], [5, 4], [6, 3], [6, 6]])
+    y = np.array([-1, -1, -1, -1, 1, 1, 1, 1])
 
-model = LinearClassifier()
-model.fit(X, y)
-coefs = model.get_coefs()
-line_x = list(range(max(X[:, 0])))
-line_y = [-x * coefs[0] / coefs[1] - coefs[2] / coefs[1] for x in line_x]
+    model = LinearClassifier()
+    model.fit(X, y)
+    coefs = model.get_coefs()
+    line_x = list(range(max(X[:, 0])))
+    line_y = [-x * coefs[0] / coefs[1] - coefs[2] / coefs[1] for x in line_x]
 
-x_0 = X[y == 1]
-x_1 = X[y == -1]
+    x_0 = X[y == 1]
+    x_1 = X[y == -1]
 
-plt.scatter(x_0[:, 0], x_0[:, 1], color="red")
-plt.scatter(x_1[:, 0], x_1[:, 1], color="blue")
-plt.plot(line_x, line_y, color="green")
+    plt.scatter(x_0[:, 0], x_0[:, 1], color="red")
+    plt.scatter(x_1[:, 0], x_1[:, 1], color="blue")
+    plt.plot(line_x, line_y, color="green")
 
-plt.xlim([3, 11])
-plt.ylim([0, 7])
-plt.grid(True)
-plt.show()
+    plt.xlim([3, 11])
+    plt.ylim([0, 7])
+    plt.grid(True)
+    plt.show()

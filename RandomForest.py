@@ -48,23 +48,21 @@ class RandomForestClassifier:
         return forest_predictions
 
 
-data = load_breast_cancer()
-X, y = data.data, data.target
+if __name__ == "__main__":
+    data = load_breast_cancer()
+    X, y = data.data, data.target
 
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=345
-)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=345
+    )
 
-model = RandomForestClassifier(
-    max_features=5, max_depth=3, num_trees=20, num_samples_per_tree=250
-)
-model.fit(X_train, y_train)
-predictions = model.predict(X_test)
+    model = RandomForestClassifier(
+        max_features=10, max_depth=3, num_trees=20, num_samples_per_tree=30
+    )
+    model.fit(X_train, y_train)
+    predictions = model.predict(X_test)
 
+    def accuracy(y_test, y_pred):
+        return np.sum(y_test == y_pred) / len(y_test)
 
-def accuracy(y_test, y_pred):
-    return np.sum(y_test == y_pred) / len(y_test)
-
-
-acc = accuracy(y_test, predictions)
-print(acc)
+    print("Random forest classification accuracy", accuracy(y_test, predictions))
