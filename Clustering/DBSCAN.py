@@ -29,23 +29,23 @@ class DBSCAN:
         # Form clusters
         clusters = []
         while len(core_points_idxs) != 0:
-            cluster_points_idxs = self.form_cluster(X, core_points_idxs)
+            cluster_points_idxs = self._form_cluster(X, core_points_idxs)
             cluster = [list(point) for point in X[cluster_points_idxs]]
             clusters.append(cluster)
 
         return clusters
 
-    def form_cluster(self, X, core_points_idxs: list):
+    def _form_cluster(self, X, core_points_idxs: list):
         # Pick random core point
         cluster_points_idxs = []
-        cluster_initial_point = np.random.choice(core_points_idxs)
+        cluster_initial_point = np.random.choice(core_points_idxs, replace=False)
         cluster_points_idxs.append(cluster_initial_point)
         core_points_idxs.remove(cluster_initial_point)
 
         # Infect other near core points
         all_core_points_added = False
         while not all_core_points_added:
-            all_core_points_added = not self.infect_core_points(
+            all_core_points_added = not self._infect_core_points(
                 X, core_points_idxs, cluster_points_idxs
             )
 
@@ -60,7 +60,7 @@ class DBSCAN:
 
         return cluster_points_idxs
 
-    def infect_core_points(self, X, core_points_idxs: list, cluster_points_idxs: list):
+    def _infect_core_points(self, X, core_points_idxs: list, cluster_points_idxs: list):
         has_points_added = False
         for chosen_point in cluster_points_idxs:
             for other_core_point_idx in core_points_idxs:
