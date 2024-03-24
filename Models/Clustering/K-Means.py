@@ -6,6 +6,7 @@ def euclidean_distance(pointA, pointB):
     return np.sqrt(np.sum(np.power(np.subtract(pointA, pointB), 2)))
 
 
+# https://www.youtube.com/watch?v=4b5d3muPQmA
 class KMeans:
     def __init__(self, num_clusters) -> None:
         self.num_clusters = num_clusters

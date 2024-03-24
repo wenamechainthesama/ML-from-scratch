@@ -6,6 +6,7 @@ def euclidean_distance(pointA, pointB):
     return np.sqrt(np.sum(np.power(np.subtract(pointA, pointB), 2)))
 
 
+# https://www.youtube.com/watch?v=RDZUdRSDOok
 class DBSCAN:
     def __init__(self, radius, num_samples_for_core):
         self.radius = radius
