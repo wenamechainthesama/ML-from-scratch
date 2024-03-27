@@ -6,6 +6,7 @@ from sklearn import datasets
 Concept:
 https://www.youtube.com/watch?v=HZGCoVF3YvM
 https://www.youtube.com/watch?v=lFJbZ6LVxN8
+https://youtu.be/OzIGqaizOAo?feature=shared
 
 Implementation:
 https://www.youtube.com/watch?v=TLInuAorxqE
@@ -62,9 +63,9 @@ if __name__ == "__main__":
         X, y, test_size=0.2, random_state=123
     )
 
-    nb = NaiveBayes()
-    nb.fit(X_train, y_train)
-    predictions = nb.predict(X_test)
+    model = NaiveBayes()
+    model.fit(X_train, y_train)
+    predictions = model.predict(X_test)
 
     def accuracy(y_true, y_pred):
         return np.sum(y_true == y_pred) / len(y_true)

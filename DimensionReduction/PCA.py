@@ -1,67 +1,65 @@
-from sklearn import datasets, decomposition
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib import colormaps
+from sklearn import datasets
 
+
+"""
+Concept:
+https://www.youtube.com/watch?v=FgakZw6K1QQ
+
+Implementation:
+https://www.youtube.com/watch?v=Rjr62b_h7S4
+"""
 
 class PCA:
-    def __init__(self, num_components=3):
+    def __init__(self, num_components):
         self.num_components = num_components
 
-    def transform(self, X: np.ndarray):
-        num_samples, num_features = X.shape
+    def fit(self, X):
+        # Center data
+        self.mean = np.mean(X, axis=0)
+        X -= self.mean
 
-        # Find center of the data
-        center = np.mean(X, axis=0)
+        # Calculate covariance
+        covariance = np.cov(X.T)
 
-        # Find PCs
-        num_pcs = min(num_samples, num_features)
-        pcs = []
-        for _ in range(num_pcs):
-            pc = self.fit_line(X, pcs)
-            pcs.append(pc)
+        # Calculate eigenvectors and eigenvalues
+        eigenvalues, eigenvectors = np.linalg.eig(covariance)
+        eigenvectors = eigenvectors.T
 
-        # Find eigenvalues for each PC
+        # Sort eigenvectors
+        idxs = np.argsort(eigenvalues)[::-1]
+        eigenvalues = eigenvalues[idxs]
+        eigenvalues = eigenvectors[idxs]
 
-        # Compare variance of each PC and total variance
+        self.components = eigenvectors[: self.num_components]
 
-        # Get rid of the most useless PCs
-
-        # Plot final 2D or 3D graph
-
-    def fit_line(self, X, perpendicular_lines):
-        pass
-        # Find projections of data points onto the line
+    def transform(self, X):
+        X -= self.mean
+        return np.dot(X, self.components.T)
 
 
-iris = datasets.load_iris()
-X = iris.data
-y = iris.target
+if __name__ == "__main__":
+    data = datasets.load_iris()
+    X = data.data
+    y = data.target
 
-fig = plt.figure(1, figsize=(4, 3))
+    pca = PCA(2)
+    pca.fit(X)
+    X_projected = pca.transform(X)
 
-ax = fig.add_subplot(111, projection="3d", elev=48, azim=134)
-ax.set_position([0, 0, 0.95, 1])
+    print("Shape of X:", X.shape)
+    print("Shape of transformed X:", X_projected.shape)
 
+    x1 = X_projected[:, 0]
+    x2 = X_projected[:, 1]
 
-pca = decomposition.PCA(n_components=3)
-pca.fit(X)
-X = pca.transform(X)
-
-for name, label in [("Setosa", 0), ("Versicolour", 1), ("Virginica", 2)]:
-    ax.text3D(
-        X[y == label, 0].mean(),
-        X[y == label, 1].mean() + 1.5,
-        X[y == label, 2].mean(),
-        name,
-        horizontalalignment="center",
-        bbox=dict(alpha=0.5, edgecolor="w", facecolor="w"),
+    plt.scatter(
+        x1, x2, c=y, edgecolor="none", alpha=0.8, cmap=colormaps.get_cmap("viridis")
     )
-# Reorder the labels to have colors matching the cluster results
-y = np.choose(y, [1, 2, 0]).astype(float)
-ax.scatter(X[:, 0], X[:, 1], X[:, 2], c=y, cmap=plt.cm.nipy_spectral, edgecolor="k")
 
-ax.xaxis.set_ticklabels([])
-ax.yaxis.set_ticklabels([])
-ax.zaxis.set_ticklabels([])
-
-plt.show()
+    plt.xlabel("Principal Component 1")
+    plt.ylabel("Principal Component 2")
+    plt.colorbar()
+    plt.show()
