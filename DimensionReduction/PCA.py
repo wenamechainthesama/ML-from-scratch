@@ -3,6 +3,11 @@ import matplotlib.pyplot as plt
 from matplotlib import colormaps
 from sklearn import datasets
 
+"""
+Linear Algebra playlist:
+https://www.youtube.com/watch?v=fNk_zzaMoSs&list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab
+"""
+
 
 """
 Concept:
@@ -11,6 +16,7 @@ https://www.youtube.com/watch?v=FgakZw6K1QQ
 Implementation:
 https://www.youtube.com/watch?v=Rjr62b_h7S4
 """
+
 
 class PCA:
     def __init__(self, num_components):
