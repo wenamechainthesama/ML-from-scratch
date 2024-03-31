@@ -1,6 +1,6 @@
 import numpy as np
 from collections import Counter
-from sklearn.datasets import load_breast_cancer
+from sklearn.datasets import load_breast_cancer, load_iris
 from sklearn.model_selection import train_test_split
 
 """
@@ -10,29 +10,28 @@ https://www.youtube.com/watch?v=LsK-xG1cLYA
 
 
 class Stump:
-    def __init__(self, split_feature, threshold, left_value, right_value):
+    def __init__(self, split_feature, threshold, left_value, right_value, weight):
         self.split_feature = split_feature
         self.threshold = threshold
         self.left_value = left_value
         self.right_value = right_value
+        self.weight = weight
 
 
 class AdaBoostClassifier:
     def __init__(self, num_stumps):
         self.num_stumps = num_stumps
-        self.stumps_and_weights = {}
+        self.stumps = []
 
     def fit(self, X: np.ndarray, y):
-        num_samples, num_features = X.shape
+        num_samples = X.shape[0]
         self.num_labels = len(np.unique(y))
 
         # Define initial sample weights
-        sample_weights = [1 / num_samples for _ in range(num_samples)]
-        feature_idxs = list(range(num_features))
+        sample_weights = np.full(num_samples, 1 / num_samples)
         for _ in range(self.num_stumps):
-            # Data preparation: if it's not first stump choose random samples from
-            # initial data using some random numbers in range (0, 1), sample weights
-            # and use it to form new stump
+            # Data preparation: choose (almost) random samples from
+            # initial data and use it to form new stump
             random_samples_idxs = np.random.choice(
                 range(num_samples), size=num_samples, p=sample_weights
             )
@@ -40,12 +39,10 @@ class AdaBoostClassifier:
             y = y[random_samples_idxs]
 
             # Set up equal weights for all samples
-            sample_weights = [1 / num_samples for _ in range(num_samples)]
+            sample_weights = np.full(num_samples, 1 / num_samples)
 
             # Find best split (threshold and feature) using gini index
-            best_split_feature_idx, best_threshold = self._best_split(
-                X, y, feature_idxs
-            )
+            best_split_feature_idx, best_threshold = self._best_split(X, y)
 
             # Determine stump values (left and right)
             left_idxs, right_idxs = self._split(
@@ -57,11 +54,6 @@ class AdaBoostClassifier:
 
             counter = Counter(y[right_idxs])
             right_value = counter.most_common(1)[0][0]
-
-            # Create stump
-            stump = Stump(
-                best_split_feature_idx, best_threshold, left_value, right_value
-            )
 
             # Calculate stump error
             left_error = 0
@@ -105,16 +97,23 @@ class AdaBoostClassifier:
             sample_weights_sum = sum(sample_weights)
             sample_weights = [weight / sample_weights_sum for weight in sample_weights]
 
+            # Create stump
+            stump = Stump(
+                best_split_feature_idx,
+                best_threshold,
+                left_value,
+                right_value,
+                stump_weight,
+            )
+
             # Add stump and its weight to list
-            self.stumps_and_weights.setdefault(stump, stump_weight)
+            self.stumps.append(stump)
 
-            # stump_idx += 1
-
-    def _best_split(self, X: np.ndarray, y, feature_idxs):
+    def _best_split(self, X: np.ndarray, y):
         best_gini = float("inf")
         best_split_feature_idx, best_threshold = None, None
 
-        for feature_idx in feature_idxs:
+        for feature_idx in range(X.shape[1]):
             feature_column = X[:, feature_idx]
             thresholds = np.unique(feature_column)
             for threshold in thresholds:
@@ -166,24 +165,37 @@ class AdaBoostClassifier:
 
     def _predict(self, x):
         label_scores = [0 for _ in range(self.num_labels)]
-        for stump, stump_weight in self.stumps_and_weights.items():
+        for stump in self.stumps:
             if x[stump.split_feature] <= stump.threshold:
-                label_scores[stump.left_value] += stump_weight
+                label_scores[stump.left_value] += stump.weight
             else:
-                label_scores[stump.right_value] += stump_weight
+                label_scores[stump.right_value] += stump.weight
 
         return np.argmax(label_scores)
 
 
 if __name__ == "__main__":
-    data = load_breast_cancer()
+    data = load_iris()
     X, y = data.data, data.target
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=1082347
     )
 
-    model = AdaBoostClassifier(num_stumps=40)
+    # X_train = np.array([
+    #     [1, 1, 205],
+    #     [0, 1, 180],
+    #     [1, 0, 210],
+    #     [1, 1, 167],
+    #     [0, 1, 156],
+    #     [0, 1, 125],
+    #     [1, 0, 168],
+    #     [1, 1, 172],
+    # ])
+    # # print(X_train)
+    # y_train = np.array([1, 1, 1, 1, 0, 0, 0, 0])
+
+    model = AdaBoostClassifier(num_stumps=7)
     model.fit(X_train, y_train)
     predictions = model.predict(X_test)
 
