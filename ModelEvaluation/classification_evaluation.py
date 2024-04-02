@@ -1,8 +1,8 @@
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import confusion_matrix, classification_report, log_loss
 from sklearn.naive_bayes import GaussianNB
-from sklearn import datasets
+from sklearn import datasets, metrics
+import matplotlib.pyplot as plt
 
 
 def accuracy(y_true, y_pred):
@@ -66,12 +66,41 @@ def specificity(y_true, y_pred):
 
 
 def log_loss(y_true, proba):
-    loss = 0
+    losses = []
     for i in range(len(y_true)):
-        loss -= (y_true[i] * np.log(proba[i])) + (1 - y_true[i]) * np.log(
-            1 - proba[i]
-        ).mean()
-    return loss
+        losses.append(
+            (y_true[i] * np.log(proba[i])) + (1 - y_true[i]) * np.log(1 - proba[i])
+        )
+    return -np.array(losses).mean()
+
+
+def roc_curve(y_true, y_pred):
+    fpr = []
+    tpr = []
+
+    num_thresholds = len(y_true)
+    thresholds = np.linspace(0, 1, num_thresholds)
+
+    label1 = sum(y_true)
+    label2 = len(y_true) - label1
+
+    for threshold in thresholds:
+        fp, tp = 0, 0
+        threshold = round(threshold, 2)
+        for i in range(len(y_pred)):
+            if y_pred[i] >= threshold:
+                if y_true[i] == 1:
+                    tp += 1
+                if y_true[i] == 0:
+                    fp += 1
+        fpr.append(fp / label2)
+        tpr.append(tp / label1)
+
+    return fpr, tpr, thresholds
+
+
+def auc(fpr, tpr):
+    return -np.trapz(tpr, fpr)
 
 
 if __name__ == "__main__":
@@ -88,12 +117,37 @@ if __name__ == "__main__":
     y_proba = model.predict_proba(X_test)
 
     print("---------------- Sklearn implementation -----------------")
-    print(classification_report(y_test, y_pred))
-    print("Sklearn log loss", log_loss(y_test, y_proba))
+    print(metrics.classification_report(y_test, y_pred))
+    print("Sklearn log loss", metrics.log_loss(y_test, y_proba[:, 1]))
+
+    fpr, tpr, thresholds = metrics.roc_curve(y_test, y_proba[:, 1])
+    auc_score = metrics.auc(fpr, tpr)
+    print("Sklearn AUC", auc_score)
+
     print("\n--------------------- Handmade ------------------------")
     print("Precision", precision(y_test, y_pred))
     print("Recall", recall(y_test, y_pred))
     print("Specificity", specificity(y_test, y_pred))
     print("F1 score", f1_score(y_test, y_pred))
     print("Accuracy", accuracy(y_test, y_pred))
-    print("Log loss", log_loss(y_test, y_proba))
+    print("Log loss", log_loss(y_test, y_proba[:, 1]))
+
+    fpr, tpr, thresholds = roc_curve(y_test, y_proba[:, 1])
+    auc_score = auc(fpr, tpr)
+    print("AUC", auc_score)
+
+    # ROC AUC plot
+    plt.plot(
+        fpr,
+        tpr,
+        marker="o",
+        color="darkorange",
+        lw=0,
+    )
+    plt.plot([0, 1], [0, 1], color="navy", linestyle="--")
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.0])
+    plt.xlabel("False Positive Rate")
+    plt.ylabel("True Positive Rate")
+    plt.title(f"ROC curve, AUC = {round(auc_score, 2)}")
+    plt.show()
