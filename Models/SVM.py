@@ -35,7 +35,7 @@ class SVM:
                     self.w -= self.learning_rate * self.lambda_param * self.w
                 else:
                     self.w -= self.learning_rate * (
-                        self.lambda_param * self.w - np.dot(x, y_[idx])
+                        2 * self.lambda_param * self.w - np.dot(x, y_[idx])
                     )
                     self.b -= self.learning_rate * y_[idx]
 
